@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Maze Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #maze {
+            border: 2px solid #333;
+        }
+        .controls {
+            position: absolute;
+            top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <p>使用方向键移动方块</p>
+        <p id="status">找到出口！</p>
+    </div>
+    <canvas id="maze" width="400" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById('maze');
+        const ctx = canvas.getContext('2d');
+        const statusText = document.getElementById('status');
+
+        // 迷宫地图 (0=路径, 1=墙)
+        const maze = [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,1,0,0,0,0,1],
+            [1,1,1,0,1,0,1,1,0,1],
+            [1,0,0,0,0,0,1,0,0,1],
+            [1,0,1,1,1,1,1,0,1,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,0,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,0,1,1,0,1],
+            [1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        // 玩家属性
+        const player = {
+            x: 1,
+            y: 1,
+            size: 20,
+            color: '#3498db'
+        };
+
+        // 终点属性
+        const end = {
+            x: 8,
+            y: 8,
+            size: 20,
+            color: '#2ecc71'
+        };
+
+        // 绘制迷宫
+        function drawMaze() {
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let y = 0; y < maze.length; y++) {
+                for (let x = 0; x < maze[y].length; x++) {
+                    if (maze[y][x] === 1) {
+                        ctx.fillStyle = '#2c3e50';
+                        ctx.fillRect(x * 40, y * 40, 40, 40);
+                    }
+                }
+            }
+        }
+
+        // 绘制玩家
+        function drawPlayer() {
+            ctx.fillStyle = player.color;
+            ctx.fillRect(
+                player.x * 40 + 10,
+                player.y * 40 + 10,
+                player.size,
+                player.size
+            );
+        }
+
+        // 绘制终点
+        function drawEnd() {
+            ctx.fillStyle = end.color;
+            ctx.fillRect(
+                end.x * 40 + 10,
+                end.y * 40 + 10,
+                end.size,
+                end.size
+            );
+        }
+
+        // 碰撞检测
+        function canMove(newX, newY) {
+            return maze[newY][newX] === 0;
+        }
+
+        // 胜利检测
+        function checkWin() {
+            if (player.x === end.x && player.y === end.y) {
+                statusText.textContent = "你赢了！按 R 重玩";
+                return true;
+            }
+            return false;
+        }
+
+        // 重置游戏
+        function resetGame() {
+            player.x = 1;
+            player.y = 1;
+            statusText.textContent = "找到出口！";
+            drawAll();
+        }
+
+        // 绘制所有元素
+        function drawAll() {
+            drawMaze();
+            drawEnd();
+            drawPlayer();
+        }
+
+        // 键盘控制
+        document.addEventListener('keydown', (e) => {
+            if (checkWin()) return;
+
+            let newX = player.x;
+            let newY = player.y;
+
+            switch(e.key) {
+                case 'ArrowUp':
+                    newY--;
+                    break;
+                case 'ArrowDown':
+                    newY++;
+                    break;
+                case 'ArrowLeft':
+                    newX--;
+                    break;
+                case 'ArrowRight':
+                    newX++;
+                    break;
+                case 'r':
+                    resetGame();
+                    return;
+            }
+
+            if (newX >= 0 && newX < maze[0].length && 
+                newY >= 0 && newY < maze.length && 
+                canMove(newX, newY)) {
+                player.x = newX;
+                player.y = newY;
+                drawAll();
+                checkWin();
+            }
+        });
+
+        // 初始化游戏
+        drawAll();
+    </script>
+</body>
+</html>
